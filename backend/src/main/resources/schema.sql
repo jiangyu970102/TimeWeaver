@@ -180,6 +180,21 @@ CREATE TABLE IF NOT EXISTS t_git_commit_record (
     CONSTRAINT fk_git_commit_record FOREIGN KEY (record_id) REFERENCES t_time_record(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 11. 时间记录模板表
+CREATE TABLE IF NOT EXISTS t_time_record_template (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id         BIGINT       NOT NULL,
+    name            VARCHAR(50)  NOT NULL COMMENT '模板名称',
+    category_id     BIGINT       NOT NULL COMMENT '关联分类',
+    description     VARCHAR(200) DEFAULT NULL COMMENT '默认描述',
+    sort_order      INT          DEFAULT 0 COMMENT '排序',
+    created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    updated_at      DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_user (user_id),
+    CONSTRAINT fk_template_user FOREIGN KEY (user_id) REFERENCES t_user(id),
+    CONSTRAINT fk_template_category FOREIGN KEY (category_id) REFERENCES t_category(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================
 -- 系统预设分类数据
 -- ============================================

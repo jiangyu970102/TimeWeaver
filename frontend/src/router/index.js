@@ -55,6 +55,11 @@ const routes = [
         component: () => import('@/views/git/GitSettings.vue'),
       },
       {
+        path: 'templates',
+        name: 'Templates',
+        component: () => import('@/views/templates/TemplateList.vue'),
+      },
+      {
         path: 'reports',
         name: 'Reports',
         component: () => import('@/views/reports/WeeklyReport.vue'),

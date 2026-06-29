@@ -41,6 +41,10 @@
             <el-icon><List /></el-icon>
             <span>时间记录</span>
           </el-menu-item>
+          <el-menu-item index="/templates">
+            <el-icon><CopyDocument /></el-icon>
+            <span>时间模板</span>
+          </el-menu-item>
           <el-menu-item index="/pomodoro">
             <el-icon><Timer /></el-icon>
             <span>番茄钟</span>
@@ -85,6 +89,16 @@
         <div class="notification-time">{{ item.generatedAt }}</div>
       </div>
     </el-drawer>
+
+    <!-- Keyboard Shortcuts Help -->
+    <el-dialog v-model="showShortcuts" title="键盘快捷键" width="420px" :close-on-click-modal="true">
+      <div class="shortcuts-list">
+        <div v-for="item in shortcutsList" :key="item.key" class="shortcut-item">
+          <el-tag size="small" style="width: 60px; text-align: center; font-weight: 600;">{{ item.key }}</el-tag>
+          <span class="shortcut-desc">{{ item.desc }}</span>
+        </div>
+      </div>
+    </el-dialog>
   </el-container>
 </template>
 
@@ -94,10 +108,11 @@ import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import {
   Odometer, List, Timer, DataAnalysis, Flag, Connection, Document, Share,
-  ArrowDown, Bell,
+  ArrowDown, Bell, CopyDocument,
 } from '@element-plus/icons-vue'
 import { ElNotification } from 'element-plus'
 import request from '@/utils/request'
+import { useShortcuts } from '@/composables/useShortcuts'
 
 const router = useRouter()
 const route = useRoute()
@@ -105,6 +120,7 @@ const userStore = useUserStore()
 
 const activeMenu = computed(() => route.path)
 const showNotifications = ref(false)
+const showShortcuts = ref(false)
 const insights = ref([])
 const isDark = ref(false)
 let ws = null
@@ -185,6 +201,18 @@ onMounted(() => {
   setTimeout(connectWebSocket, 1000)
 })
 
+// 键盘快捷键（全局）
+useShortcuts({
+  '?': () => { showShortcuts.value = !showShortcuts.value },
+  Escape: () => { showShortcuts.value = false },
+}, { inputFilter: false })
+
+const shortcutsList = [
+  { key: '?', desc: '显示/隐藏快捷键帮助' },
+  { key: 'S', desc: '开始/停止计时（仪表盘）' },
+  { key: 'N', desc: '聚焦分类选择（仪表盘）' },
+]
+
 onUnmounted(() => {
   ws?.close()
   clearInterval(heartbeatTimer)
@@ -258,6 +286,10 @@ onUnmounted(() => {
 .notification-unread:hover {
   background: #d9ecff;
 }
+
+.shortcuts-list { display: flex; flex-direction: column; gap: 12px; }
+.shortcut-item { display: flex; align-items: center; gap: 12px; }
+.shortcut-desc { font-size: 14px; color: #606266; }
 
 .notification-title {
   font-size: 14px;

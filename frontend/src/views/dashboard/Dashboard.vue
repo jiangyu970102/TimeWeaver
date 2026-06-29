@@ -64,6 +64,21 @@
               </el-option>
             </el-select>
             <el-input v-model="recordDesc" placeholder="描述（选填）" style="margin-bottom: 12px" maxlength="200" show-word-limit />
+            <!-- 快捷模板 -->
+            <div class="quick-templates" v-if="templates.length > 0">
+              <div class="quick-templates-label">快捷模板</div>
+              <div class="quick-templates-btns">
+                <el-button
+                  v-for="tpl in templates"
+                  :key="tpl.id"
+                  size="small"
+                  plain
+                  @click="applyTemplate(tpl)"
+                >
+                  {{ tpl.name }}
+                </el-button>
+              </div>
+            </div>
             <el-button
               :type="isOngoing ? 'danger' : 'primary'"
               :loading="recordingLoading"
@@ -77,6 +92,10 @@
                 ▶ 开始计时
               </template>
             </el-button>
+            <div class="template-footer" v-if="templates.length === 0">
+              <span class="template-tip">使用模板快速开始 — </span>
+              <el-link type="primary" :underline="false" @click="$router.push('/templates')" size="small">去创建</el-link>
+            </div>
           </div>
         </el-card>
       </el-col>
@@ -212,6 +231,8 @@ import { getRecords, createRecord, stopRecord, getCurrentRecord } from '@/api/re
 import { getDailyStats, getDailySummary } from '@/api/stats'
 import { getCategories } from '@/api/categories'
 import { getGitCommits } from '@/api/git'
+import { getTemplates } from '@/api/record-templates'
+import { useShortcuts } from '@/composables/useShortcuts'
 
 const categories = ref([])
 const selectedCategory = ref(null)
@@ -230,6 +251,7 @@ const summary = ref({
   categoryBreakdown: [], date: '',
 })
 const summaryLoading = ref(false)
+const templates = ref([])
 let timer = null
 
 const todayTotal = computed(() =>
@@ -263,6 +285,23 @@ function startElapsedTimer(startTime) {
     const s = String(diff % 60).padStart(2, '0')
     elapsed.value = `${m}:${s}`
   }, 1000)
+}
+
+function applyTemplate(tpl) {
+  if (isOngoing.value) {
+    ElMessage.warning('请先停止当前计时')
+    return
+  }
+  selectedCategory.value = tpl.categoryId
+  recordDesc.value = tpl.description || ''
+  toggleRecord()
+}
+
+async function loadTemplates() {
+  try {
+    const res = await getTemplates()
+    if (res.code === 200) templates.value = res.data || []
+  } catch {}
 }
 
 async function toggleRecord() {
@@ -378,6 +417,19 @@ onMounted(() => {
   checkOngoing()
   loadGitCommits()
   loadSummary()
+  loadTemplates()
+})
+
+// 键盘快捷键
+useShortcuts({
+  s: () => {
+    if (!recordingLoading.value) toggleRecord()
+  },
+  n: () => {
+    if (!isOngoing.value) {
+      document.querySelector('.quick-record .el-select')?.click()
+    }
+  },
 })
 
 onUnmounted(() => {
@@ -418,4 +470,9 @@ onUnmounted(() => {
 .summary-label { font-size: 13px; color: #909399; margin-top: 4px; }
 .category-chips { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
 .chip-label { font-size: 13px; color: #606266; margin-right: 4px; white-space: nowrap; }
+.quick-templates { margin-bottom: 12px; }
+.quick-templates-label { font-size: 12px; color: #909399; margin-bottom: 6px; }
+.quick-templates-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.template-footer { margin-top: 8px; text-align: center; font-size: 13px; }
+.template-tip { color: #909399; }
 </style>
