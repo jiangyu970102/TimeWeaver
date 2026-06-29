@@ -45,6 +45,11 @@ const routes = [
         component: () => import('@/views/stats/CalendarView.vue'),
       },
       {
+        path: 'yearly',
+        name: 'YearlyReport',
+        component: () => import('@/views/stats/YearlyReport.vue'),
+      },
+      {
         path: 'goals',
         name: 'Goals',
         component: () => import('@/views/goals/GoalList.vue'),

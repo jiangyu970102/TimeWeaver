@@ -74,6 +74,89 @@ public class StatsService {
         );
     }
 
+    public Map<String, Object> getYearlyStats(Long userId, int year) {
+        int totalMinutes = 0;
+        int totalRecords = 0;
+        int daysWithRecords = 0;
+        int bestMonth = 0;
+        int bestMonthMinutes = 0;
+
+        List<Map<String, Object>> monthlyBreakdown = new ArrayList<>();
+        var categories = categoryMapper.selectList(null);
+
+        for (int m = 1; m <= 12; m++) {
+            LocalDate start = LocalDate.of(year, m, 1);
+            LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+            int monthMinutes = 0;
+            int monthRecords = 0;
+            int monthDays = 0;
+
+            for (LocalDate d = start; !d.isAfter(end); d = d.plusDays(1)) {
+                var records = timeRecordMapper.findByUserAndDate(userId, d);
+                if (!records.isEmpty()) {
+                    int dayTotal = records.stream().mapToInt(r -> r.getDurationMin() != null ? r.getDurationMin() : 0).sum();
+                    monthMinutes += dayTotal;
+                    monthRecords += records.size();
+                    monthDays++;
+                }
+            }
+
+            totalMinutes += monthMinutes;
+            totalRecords += monthRecords;
+            daysWithRecords += monthDays;
+
+            if (monthMinutes > bestMonthMinutes) {
+                bestMonthMinutes = monthMinutes;
+                bestMonth = m;
+            }
+
+            monthlyBreakdown.add(Map.of(
+                    "month", m,
+                    "totalMinutes", monthMinutes,
+                    "totalRecords", monthRecords,
+                    "activeDays", monthDays
+            ));
+        }
+
+        // 全年分类统计（一次查询所有记录）
+        Map<Long, Integer> categoryMinutes = new HashMap<>();
+        LocalDate yearStart = LocalDate.of(year, 1, 1);
+        LocalDate yearEnd = LocalDate.of(year, 12, 31);
+        var allYearRecords = timeRecordMapper.findByUserAndDateRange(userId, yearStart, yearEnd);
+        for (var r : allYearRecords) {
+            if (r.getCategoryId() != null && r.getDurationMin() != null) {
+                categoryMinutes.merge(r.getCategoryId(), r.getDurationMin(), Integer::sum);
+            }
+        }
+
+        Map<Long, String> catNames = categories.stream()
+                .collect(java.util.stream.Collectors.toMap(c -> c.getId(), c -> c.getName()));
+
+        List<Map<String, Object>> categoryBreakdown = new ArrayList<>();
+        for (var entry : categoryMinutes.entrySet()) {
+            categoryBreakdown.add(Map.of(
+                    "categoryId", entry.getKey(),
+                    "name", catNames.getOrDefault(entry.getKey(), "未知"),
+                    "minutes", entry.getValue()
+            ));
+        }
+        categoryBreakdown.sort((a, b) -> ((Integer) b.get("minutes")).compareTo((Integer) a.get("minutes")));
+
+        int avgDaily = (int) (totalMinutes / (long) Math.max(1, Math.min(daysWithRecords, 365)));
+
+        return Map.of(
+                "year", year,
+                "totalMinutes", totalMinutes,
+                "totalRecords", totalRecords,
+                "activeDays", daysWithRecords,
+                "avgDailyMinutes", avgDaily,
+                "bestMonth", bestMonth,
+                "bestMonthMinutes", bestMonthMinutes,
+                "monthlyBreakdown", monthlyBreakdown,
+                "categoryBreakdown", categoryBreakdown
+        );
+    }
+
     public List<Map<String, Object>> getHeatmapData(Long userId, int year, int month) {
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());

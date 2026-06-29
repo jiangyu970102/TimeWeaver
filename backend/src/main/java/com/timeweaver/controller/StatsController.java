@@ -72,6 +72,14 @@ public class StatsController {
         return ResponseResult.success(statsService.getComparisonData(userId, currentStart, currentEnd));
     }
 
+    @GetMapping("/yearly")
+    public ResponseResult<Map<String, Object>> yearly(
+            @AuthenticationPrincipal Long userId,
+            @RequestParam(required = false) Integer year) {
+        if (year == null) year = LocalDate.now().getYear();
+        return ResponseResult.success(statsService.getYearlyStats(userId, year));
+    }
+
     @GetMapping("/categories")
     public ResponseResult<Map<String, Object>> categoryStats(
             @AuthenticationPrincipal Long userId,

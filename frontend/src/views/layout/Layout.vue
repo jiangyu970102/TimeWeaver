@@ -69,6 +69,10 @@
             <el-icon><Share /></el-icon>
             <span>Git 集成</span>
           </el-menu-item>
+          <el-menu-item index="/yearly">
+            <el-icon><TrendCharts /></el-icon>
+            <span>年度报告</span>
+          </el-menu-item>
           <el-menu-item index="/reports">
             <el-icon><Document /></el-icon>
             <span>AI 周报</span>
@@ -112,7 +116,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import {
   Odometer, List, Timer, DataAnalysis, Flag, Connection, Document, Share,
-  ArrowDown, Bell, CopyDocument, Calendar,
+  ArrowDown, Bell, CopyDocument, Calendar, TrendCharts,
 } from '@element-plus/icons-vue'
 import { ElNotification } from 'element-plus'
 import request from '@/utils/request'
