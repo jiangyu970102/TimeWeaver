@@ -63,7 +63,20 @@
                 <span :style="{ color: cat.color }">{{ cat.icon }} {{ cat.name }}</span>
               </el-option>
             </el-select>
-            <el-input v-model="recordDesc" placeholder="描述（选填）" style="margin-bottom: 12px" maxlength="200" show-word-limit />
+            <el-input v-model="recordDesc" placeholder="描述（选填）" style="margin-bottom: 12px" maxlength="200" show-word-limit @input="onDescInput" />
+            <!-- AI 分类建议 -->
+            <div v-if="suggestedCategory" class="suggest-category" style="margin-bottom: 12px">
+              <span class="suggest-label">建议分类：</span>
+              <el-tag
+                :color="getCategoryColor(suggestedCategory)"
+                size="small"
+                effect="dark"
+                style="color: #fff; border: none; cursor: pointer"
+                @click="selectedCategory = suggestedCategory; suggestedCategory = null"
+              >
+                {{ getCategoryName(suggestedCategory) }} 点击应用
+              </el-tag>
+            </div>
             <!-- 快捷模板 -->
             <div class="quick-templates" v-if="templates.length > 0">
               <div class="quick-templates-label">快捷模板</div>
@@ -227,7 +240,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { formatTime, formatDuration } from '@/utils/format'
-import { getRecords, createRecord, stopRecord, getCurrentRecord } from '@/api/records'
+import { getRecords, createRecord, stopRecord, getCurrentRecord, classifyDescription } from '@/api/records'
 import { getDailyStats, getDailySummary } from '@/api/stats'
 import { getCategories } from '@/api/categories'
 import { getGitCommits } from '@/api/git'
@@ -252,6 +265,8 @@ const summary = ref({
 })
 const summaryLoading = ref(false)
 const templates = ref([])
+const suggestedCategory = ref(null)
+let classifyTimer = null
 let timer = null
 
 const todayTotal = computed(() =>
@@ -285,6 +300,25 @@ function startElapsedTimer(startTime) {
     const s = String(diff % 60).padStart(2, '0')
     elapsed.value = `${m}:${s}`
   }, 1000)
+}
+
+function onDescInput(value) {
+  // 输入框为空时清除建议
+  if (!value || !value.trim()) {
+    suggestedCategory.value = null
+    return
+  }
+  clearTimeout(classifyTimer)
+  classifyTimer = setTimeout(async () => {
+    try {
+      const res = await classifyDescription(value)
+      if (res.code === 200 && res.data?.suggestedCategoryId) {
+        suggestedCategory.value = res.data.suggestedCategoryId
+      } else {
+        suggestedCategory.value = null
+      }
+    } catch { /* ignore */ }
+  }, 600) // 600ms 防抖
 }
 
 function applyTemplate(tpl) {
@@ -470,6 +504,8 @@ onUnmounted(() => {
 .summary-label { font-size: 13px; color: #909399; margin-top: 4px; }
 .category-chips { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
 .chip-label { font-size: 13px; color: #606266; margin-right: 4px; white-space: nowrap; }
+.suggest-category { display: flex; align-items: center; gap: 6px; }
+.suggest-label { font-size: 12px; color: #909399; white-space: nowrap; }
 .quick-templates { margin-bottom: 12px; }
 .quick-templates-label { font-size: 12px; color: #909399; margin-bottom: 6px; }
 .quick-templates-btns { display: flex; flex-wrap: wrap; gap: 6px; }

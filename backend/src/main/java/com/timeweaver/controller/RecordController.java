@@ -3,6 +3,7 @@ package com.timeweaver.controller;
 import com.timeweaver.common.utils.ResponseResult;
 import com.timeweaver.dto.request.RecordCreateRequest;
 import com.timeweaver.entity.TimeRecord;
+import com.timeweaver.service.CategorySuggestionService;
 import com.timeweaver.service.TimeRecordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/records")
@@ -19,6 +21,7 @@ import java.util.List;
 public class RecordController {
 
     private final TimeRecordService timeRecordService;
+    private final CategorySuggestionService categorySuggestionService;
 
     @GetMapping
     public ResponseResult<List<TimeRecord>> list(
@@ -66,5 +69,17 @@ public class RecordController {
                                        @PathVariable Long id) {
         timeRecordService.deleteRecord(userId, id);
         return ResponseResult.success();
+    }
+
+    @PostMapping("/classify")
+    public ResponseResult<Map<String, Object>> classify(
+            @AuthenticationPrincipal Long userId,
+            @RequestBody Map<String, String> body) {
+        String description = body.getOrDefault("description", "");
+        Long categoryId = categorySuggestionService.suggestCategory(userId, description);
+        return ResponseResult.success(Map.of(
+                "suggestedCategoryId", categoryId,
+                "description", description
+        ));
     }
 }

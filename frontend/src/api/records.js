@@ -23,3 +23,7 @@ export function deleteRecord(id) {
 export function getCurrentRecord() {
   return request.get('/records/current')
 }
+
+export function classifyDescription(description) {
+  return request.post('/records/classify', { description })
+}
