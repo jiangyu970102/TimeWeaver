@@ -40,6 +40,11 @@ const routes = [
         component: () => import('@/views/pomodoro/PomodoroView.vue'),
       },
       {
+        path: 'calendar',
+        name: 'Calendar',
+        component: () => import('@/views/stats/CalendarView.vue'),
+      },
+      {
         path: 'goals',
         name: 'Goals',
         component: () => import('@/views/goals/GoalList.vue'),

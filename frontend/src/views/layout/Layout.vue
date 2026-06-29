@@ -53,6 +53,10 @@
             <el-icon><DataAnalysis /></el-icon>
             <span>数据分析</span>
           </el-menu-item>
+          <el-menu-item index="/calendar">
+            <el-icon><Calendar /></el-icon>
+            <span>日历视图</span>
+          </el-menu-item>
           <el-menu-item index="/goals">
             <el-icon><Flag /></el-icon>
             <span>目标管理</span>
@@ -108,7 +112,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import {
   Odometer, List, Timer, DataAnalysis, Flag, Connection, Document, Share,
-  ArrowDown, Bell, CopyDocument,
+  ArrowDown, Bell, CopyDocument, Calendar,
 } from '@element-plus/icons-vue'
 import { ElNotification } from 'element-plus'
 import request from '@/utils/request'
