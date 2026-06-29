@@ -38,11 +38,22 @@ TimeWeaver 是一个面向程序员和知识工作者的全栈时间追踪与 AI
 - 可执行的行动建议
 - WebSocket 实时推送生成完成通知
 
-### AI 会话追踪（新增）
+### AI 会话追踪
 - **自动检测** — 本地脚本实时检测 Claude Code / Cursor / Codex / Kimi 等 AI 工具活跃状态
 - **时长记录** — 自动记录每次 AI 会话的开始、结束及持续时间
 - **可视化分析** — 工具分布、模型分布、每日趋势图表
 - **手动管理** — 支持手动新增/编辑/删除会话记录，补充自动检测的遗漏
+
+### Git 集成
+- **仓库管理** — 添加/删除本地 Git 仓库，一键扫描提交记录
+- **提交去重** — 按 commit hash 自动去重，避免重复导入
+- **智能分组** — 连续提交（间隔 < 30 分钟）自动合并为"编码时段"
+- **一键导入** — 将 Git 提交批量导入为时间记录，关联"开发·编码"分类
+
+### 日总结
+- **数据聚合** — 每日自动汇总时间记录、AI 会话、Git 提交、目标进度
+- **分类统计** — 各分类耗时分布，彩色标签一目了然
+- **仪表盘集成** — 首页顶部日总结卡片，快速掌握全天概况
 
 ### 实时通知
 - 目标达成/偏离提醒
@@ -220,10 +231,11 @@ TimeWeaver/
 │   └── src/
 │       ├── views/                   # 页面组件
 │       │   ├── login/               # 登录/注册
-│       │   ├── dashboard/           # 首页概览
+│       │   ├── dashboard/           # 首页概览（含日总结、Git 提交面板）
 │       │   ├── records/             # 时间记录
 │       │   ├── stats/               # 数据分析（ECharts）
 │       │   ├── ai/                  # AI 会话追踪
+│       │   ├── git/                 # Git 集成
 │       │   ├── pomodoro/            # 番茄钟
 │       │   ├── goals/               # 目标管理
 │       │   ├── reports/             # AI 周报
@@ -254,8 +266,9 @@ TimeWeaver/
 | **番茄钟** | `POST /api/pomodoros/*` | 开始/完成/中断/统计 |
 | **目标** | `CRUD /api/goals` | 目标管理与进度追踪 |
 | **AI 会话** | `CRUD /api/ai-sessions` `GET /api/ai-sessions/stats` | AI 工具会话追踪与统计 |
+| **Git 集成** | `CRUD /api/git/repos` `POST /api/git/scan` `POST /api/git/import` | 仓库管理、提交扫描与导入 |
 | **AI 周报** | `GET /api/reports/weekly` `POST /api/reports/.../generate` | 生成与获取周报 |
-| **仪表盘** | `GET /api/dashboard/*` | 首页概览数据 |
+| **仪表盘** | `GET /api/dashboard/overview` `GET /api/dashboard/summary` | 首页概览与日总结 |
 | **WebSocket** | `ws://host/ws/notification?token={jwt}` | 实时通知 |
 
 ---
@@ -264,8 +277,10 @@ TimeWeaver/
 
 - **Spring AI 集成**：调用 ChatClient 生成结构化 JSON 周报，自动解析为 Java 对象
 - **AI 降级策略**：未配置 LLM API Key 时自动使用模板引擎生成周报，保证功能可用
+- **Git 集成**：扫描本地 Git 仓库历史，智能分组为编码时段，一键导入时间记录
 - **多维度可视化**：6 种 ECharts 图表（热力图/桑基图/雷达图等）覆盖不同分析视角
 - **WebSocket 推送**：每个用户独立 session 管理，实现目标提醒与周报通知实时到达
+- **日总结聚合**：自动汇总时间记录、AI 会话、Git 提交、目标进度于一张卡片
 - **时间预聚合**：按日/周/月多粒度预聚合，大数据量下查询 < 50ms
 - **完整测试**：12 个单元测试覆盖核心 Service 层，Mockito + JUnit 5
 
