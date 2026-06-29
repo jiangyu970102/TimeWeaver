@@ -1,0 +1,16 @@
+{
+  "name": "TimeWeaver - 智能时间投资分析",
+  "short_name": "TimeWeaver",
+  "description": "像记账一样记录时间，AI 分析你的效率模式",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#409eff",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

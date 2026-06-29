@@ -1,0 +1,30 @@
+# Java / Maven
+backend/target/
+*.class
+*.jar
+*.war
+*.log
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment / Secrets
+.env
+backend/src/main/resources/application-prod.yml
+
+# Runtime
+*.pid
+*.seed
+存档/
