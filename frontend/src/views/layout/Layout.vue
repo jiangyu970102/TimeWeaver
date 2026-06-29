@@ -57,6 +57,10 @@
             <el-icon><Connection /></el-icon>
             <span>AI 会话</span>
           </el-menu-item>
+          <el-menu-item index="/git">
+            <el-icon><Share /></el-icon>
+            <span>Git 集成</span>
+          </el-menu-item>
           <el-menu-item index="/reports">
             <el-icon><Document /></el-icon>
             <span>AI 周报</span>
@@ -89,7 +93,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import {
-  Odometer, List, Timer, DataAnalysis, Flag, Connection, Document,
+  Odometer, List, Timer, DataAnalysis, Flag, Connection, Document, Share,
   ArrowDown, Bell,
 } from '@element-plus/icons-vue'
 import { ElNotification } from 'element-plus'

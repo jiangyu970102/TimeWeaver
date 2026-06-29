@@ -260,7 +260,7 @@ TimeWeaver/
 
 ---
 
-## 面试亮点
+## 项目亮点
 
 - **Spring AI 集成**：调用 ChatClient 生成结构化 JSON 周报，自动解析为 Java 对象
 - **AI 降级策略**：未配置 LLM API Key 时自动使用模板引擎生成周报，保证功能可用

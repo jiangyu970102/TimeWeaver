@@ -103,6 +103,104 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- Daily Summary -->
+    <el-row :gutter="20" style="margin-top: 20px">
+      <el-col :span="24">
+        <el-card shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <span>日总结</span>
+              <el-tag size="small" type="info">{{ summary.date }}</el-tag>
+            </div>
+          </template>
+          <el-row :gutter="20" v-loading="summaryLoading">
+            <el-col :span="5">
+              <div class="summary-stat">
+                <div class="summary-value">{{ summary.totalMinutes }}</div>
+                <div class="summary-label">总时长 (min)</div>
+              </div>
+            </el-col>
+            <el-col :span="4">
+              <div class="summary-stat">
+                <div class="summary-value">{{ summary.recordCount }}</div>
+                <div class="summary-label">记录条数</div>
+              </div>
+            </el-col>
+            <el-col :span="5">
+              <div class="summary-stat">
+                <div class="summary-value">{{ summary.aiSessionCount }}</div>
+                <div class="summary-label">AI 会话 ({{ summary.aiTotalMinutes }}min)</div>
+              </div>
+            </el-col>
+            <el-col :span="5">
+              <div class="summary-stat">
+                <div class="summary-value">{{ summary.gitCommitCount }}</div>
+                <div class="summary-label">Git 提交</div>
+              </div>
+            </el-col>
+            <el-col :span="5">
+              <div class="summary-stat">
+                <div class="summary-value">{{ summary.completedGoals }}/{{ summary.goalCount }}</div>
+                <div class="summary-label">目标完成</div>
+                <el-progress
+                  v-if="summary.goalCount > 0"
+                  :percentage="summary.goalProgress"
+                  :stroke-width="6"
+                  style="margin-top: 4px"
+                />
+              </div>
+            </el-col>
+          </el-row>
+          <el-divider style="margin: 12px 0" />
+          <div class="category-chips" v-if="summary.categoryBreakdown?.length">
+            <span class="chip-label">分类:</span>
+            <el-tag
+              v-for="item in summary.categoryBreakdown"
+              :key="item.categoryId"
+              size="small"
+              :style="{ background: item.color, color: '#fff', border: 'none', margin: '2px 4px' }"
+            >
+              {{ item.name }} {{ item.minutes }}min
+            </el-tag>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- Git Commits Today -->
+    <el-row :gutter="20" style="margin-top: 20px">
+      <el-col :span="24">
+        <el-card shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <span>今日 Git 提交</span>
+              <el-button size="small" text @click="$router.push('/git')">管理仓库</el-button>
+            </div>
+          </template>
+          <el-table :data="gitCommits" v-loading="gitLoading" empty-text="今天暂无提交记录" size="small" stripe>
+            <el-table-column prop="repoPath" label="仓库" width="120" />
+            <el-table-column label="Hash" width="80">
+              <template #default="{ row }">
+                <code style="font-size: 11px">{{ row.commitHash.substring(0, 7) }}</code>
+              </template>
+            </el-table-column>
+            <el-table-column prop="message" label="提交信息" min-width="300" show-overflow-tooltip />
+            <el-table-column prop="committedAt" label="时间" width="150">
+              <template #default="{ row }">
+                {{ formatGitTime(row.committedAt) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="状态" width="70" align="center">
+              <template #default="{ row }">
+                <el-tag v-if="row.recordId" type="success" size="small">已导入</el-tag>
+                <el-tag v-else type="info" size="small">待导入</el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -111,8 +209,9 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { formatTime, formatDuration } from '@/utils/format'
 import { getRecords, createRecord, stopRecord, getCurrentRecord } from '@/api/records'
-import { getDailyStats } from '@/api/stats'
+import { getDailyStats, getDailySummary } from '@/api/stats'
 import { getCategories } from '@/api/categories'
+import { getGitCommits } from '@/api/git'
 
 const categories = ref([])
 const selectedCategory = ref(null)
@@ -123,6 +222,14 @@ const isOngoing = computed(() => ongoingRecord.value !== null && ongoingRecord.v
 const recordingLoading = ref(false)
 const elapsed = ref('00:00')
 const slackingAlert = ref('')
+const gitCommits = ref([])
+const gitLoading = ref(false)
+const summary = ref({
+  totalMinutes: 0, recordCount: 0, aiSessionCount: 0, aiTotalMinutes: 0,
+  gitCommitCount: 0, goalCount: 0, completedGoals: 0, goalProgress: 0,
+  categoryBreakdown: [], date: '',
+})
+const summaryLoading = ref(false)
 let timer = null
 
 const todayTotal = computed(() =>
@@ -209,6 +316,31 @@ async function loadData() {
   } catch {}
 }
 
+function formatGitTime(dt) {
+  if (!dt) return '—'
+  return dt.replace('T', ' ').substring(11, 19)
+}
+
+async function loadSummary() {
+  summaryLoading.value = true
+  try {
+    const res = await getDailySummary()
+    if (res.code === 200 && res.data) {
+      summary.value = res.data
+    }
+  } catch { /* ignore */ }
+  finally { summaryLoading.value = false }
+}
+
+async function loadGitCommits() {
+  gitLoading.value = true
+  try {
+    const res = await getGitCommits({ date: new Date().toISOString().slice(0, 10) })
+    if (res.code === 200) gitCommits.value = res.data || []
+  } catch { /* ignore */ }
+  finally { gitLoading.value = false }
+}
+
 function checkSlacking() {
   slackingAlert.value = ''
   const thresholdMin = 60 // 娱乐超过 60 分钟提醒
@@ -244,6 +376,8 @@ onMounted(() => {
   loadCategories()
   loadData()
   checkOngoing()
+  loadGitCommits()
+  loadSummary()
 })
 
 onUnmounted(() => {
@@ -279,4 +413,9 @@ onUnmounted(() => {
 .timeline-content { display: flex; align-items: center; gap: 8px; }
 .timeline-desc { flex: 1; font-size: 14px; color: #606266; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .timeline-duration { font-size: 12px; color: #909399; white-space: nowrap; }
+.summary-stat { text-align: center; padding: 8px 0; }
+.summary-value { font-size: 28px; font-weight: 700; color: #303133; }
+.summary-label { font-size: 13px; color: #909399; margin-top: 4px; }
+.category-chips { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.chip-label { font-size: 13px; color: #606266; margin-right: 4px; white-space: nowrap; }
 </style>

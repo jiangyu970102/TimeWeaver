@@ -150,6 +150,36 @@ CREATE TABLE IF NOT EXISTS t_ai_session (
     CONSTRAINT fk_ai_session_record FOREIGN KEY (record_id) REFERENCES t_time_record(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 9. Git 仓库配置表
+CREATE TABLE IF NOT EXISTS t_git_repo_config (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id         BIGINT       NOT NULL,
+    repo_path       VARCHAR(500) NOT NULL COMMENT '本地仓库绝对路径',
+    repo_name       VARCHAR(100) DEFAULT NULL COMMENT '仓库名称（自动提取）',
+    auto_import     TINYINT      DEFAULT 0 COMMENT '0-手动, 1-自动导入为时间记录',
+    created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    updated_at      DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_user (user_id),
+    CONSTRAINT fk_git_config_user FOREIGN KEY (user_id) REFERENCES t_user(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 10. Git 提交记录表
+CREATE TABLE IF NOT EXISTS t_git_commit_record (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id         BIGINT       NOT NULL,
+    repo_path       VARCHAR(100) DEFAULT NULL COMMENT '仓库名（冗余，便于展示）',
+    commit_hash     VARCHAR(64)  NOT NULL,
+    author_name     VARCHAR(100) DEFAULT NULL,
+    message         TEXT         DEFAULT NULL,
+    committed_at    DATETIME     NOT NULL,
+    record_id       BIGINT       DEFAULT NULL COMMENT '关联的时间记录ID（导入后非空）',
+    created_at      DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_time (user_id, committed_at),
+    INDEX idx_hash (user_id, commit_hash),
+    CONSTRAINT fk_git_commit_user FOREIGN KEY (user_id) REFERENCES t_user(id),
+    CONSTRAINT fk_git_commit_record FOREIGN KEY (record_id) REFERENCES t_time_record(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================
 -- 系统预设分类数据
 -- ============================================

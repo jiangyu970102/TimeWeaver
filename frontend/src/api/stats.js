@@ -27,3 +27,7 @@ export function getComparisonData(params) {
 export function getCategoryStats(params) {
   return request.get('/stats/categories', { params })
 }
+
+export function getDailySummary(params) {
+  return request.get('/dashboard/summary', { params })
+}
