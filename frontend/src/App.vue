@@ -281,4 +281,117 @@ html.dark .not-found-page {
 html.dark .error-title {
   color: var(--text-primary) !important;
 }
+
+/* ── 仪表盘 ── */
+html.dark .summary-value {
+  color: var(--text-primary) !important;
+}
+html.dark .summary-label,
+html.dark .chip-label,
+html.dark .template-tip {
+  color: var(--text-secondary) !important;
+}
+html.dark .timeline-item {
+  border-bottom-color: var(--border-color) !important;
+}
+html.dark .timeline-time,
+html.dark .timeline-duration {
+  color: var(--text-muted) !important;
+}
+html.dark .timeline-desc {
+  color: var(--text-secondary) !important;
+}
+
+/* ── 快捷模板按钮 ── */
+html.dark .quick-templates-label {
+  color: var(--text-muted) !important;
+}
+
+/* ── 统计图表 ── */
+html.dark .stats-chart-title {
+  color: var(--text-primary) !important;
+}
+html.dark .stats-card-header {
+  color: var(--text-secondary) !important;
+}
+
+/* ── 提醒横幅 ── */
+html.dark .el-alert--warning {
+  background: rgba(230, 162, 60, 0.15) !important;
+}
+
+/* ── 标签 ── */
+html.dark .el-tag.el-tag--plain {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ── 分页 ── */
+html.dark .el-pagination button,
+html.dark .el-pagination .el-pager li {
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+}
+html.dark .el-pagination .el-pager li.is-active {
+  color: #409eff !important;
+}
+
+/* ── 进度条背景 ── */
+html.dark .el-progress-bar__outer {
+  background: var(--bg-secondary) !important;
+}
+
+/* ── 开关 ── */
+html.dark .el-switch.is-checked .el-switch__core {
+  border-color: #409eff !important;
+  background: #409eff !important;
+}
+
+/* ── 统计卡片 ── */
+html.dark .stat-chip {
+  background: var(--bg-card) !important;
+}
+html.dark .stat-num {
+  color: var(--text-primary) !important;
+}
+
+/* ── AI 会话页面 ── */
+html.dark .chart-container {
+  background: var(--bg-card) !important;
+}
+
+/* ── 目标管理 ── */
+html.dark .goal-item {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+html.dark .goal-name {
+  color: var(--text-primary) !important;
+}
+html.dark .goal-progress-text {
+  color: var(--text-muted) !important;
+}
+
+/* ── 番茄钟 ── */
+html.dark .pomo-card {
+  background: var(--bg-card) !important;
+}
+html.dark .pomo-time {
+  color: var(--text-primary) !important;
+}
+html.dark .pomo-status {
+  color: var(--text-muted) !important;
+}
+
+/* ── 通知角标 ── */
+html.dark .el-badge__content {
+  border-color: var(--bg-secondary) !important;
+}
+
+/* ── ECharts 适配 ── */
+html.dark .echarts-container {
+  background: transparent !important;
+}
+
 </style>

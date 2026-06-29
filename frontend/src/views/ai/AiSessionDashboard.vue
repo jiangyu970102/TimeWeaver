@@ -267,10 +267,21 @@ function renderCharts(data) {
   modelChart?.dispose()
   trendChart?.dispose()
 
+  const isDark = localStorage.getItem('timeweaver-dark-mode') === 'true'
+  const labelColor = isDark ? '#c0c0c0' : '#606266'
+  const axisColor = isDark ? '#555' : '#ddd'
+
+  const textStyle = { color: labelColor }
+  const commonOpts = {
+    textStyle,
+    tooltip: { textStyle: { color: '#333' } },
+  }
+
   // Tool pie
   if (toolChartRef.value) {
     toolChart = echarts.init(toolChartRef.value)
     toolChart.setOption({
+      ...commonOpts,
       tooltip: { trigger: 'item', formatter: '{b}: {c} 次 ({d}%)' },
       series: [{
         type: 'pie',
@@ -279,7 +290,7 @@ function renderCharts(data) {
           name: t.name,
           value: t.count,
         })),
-        label: { show: true, formatter: '{b}: {c}' },
+        label: { show: true, formatter: '{b}: {c}', color: labelColor },
       }],
     })
   }
@@ -288,6 +299,7 @@ function renderCharts(data) {
   if (modelChartRef.value) {
     modelChart = echarts.init(modelChartRef.value)
     modelChart.setOption({
+      ...commonOpts,
       tooltip: { trigger: 'item', formatter: '{b}: {c} 次 ({d}%)' },
       series: [{
         type: 'pie',
@@ -296,7 +308,7 @@ function renderCharts(data) {
           name: m.name,
           value: m.count,
         })),
-        label: { show: true, formatter: '{b}: {c}' },
+        label: { show: true, formatter: '{b}: {c}', color: labelColor },
       }],
     })
   }
@@ -319,10 +331,11 @@ function renderCharts(data) {
 
     trendChart = echarts.init(trendChartRef.value)
     trendChart.setOption({
+      ...commonOpts,
       tooltip: { trigger: 'axis' },
-      legend: { data: tools },
-      xAxis: { type: 'category', data: dates },
-      yAxis: { type: 'value', minInterval: 1 },
+      legend: { data: tools, textStyle },
+      xAxis: { type: 'category', data: dates, axisLabel: { color: labelColor }, axisLine: { lineStyle: { color: axisColor } } },
+      yAxis: { type: 'value', minInterval: 1, axisLabel: { color: labelColor }, splitLine: { lineStyle: { color: axisColor } } },
       series,
     })
   }
